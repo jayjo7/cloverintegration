@@ -1,4 +1,3 @@
-//Note to Jay - Refactor when you get a chance to read the data from settings.json and load the database 
 Meteor.startup(function() {
 
 

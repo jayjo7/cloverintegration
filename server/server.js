@@ -388,12 +388,12 @@ Orders.after.update (function (userId, doc, fieldNames, modifier, options)
 {
   // this.previous  --- Will contain the doc previous to update, if previous doc is needed update the fetchPrevious: true
 
-   console.log('Orders.after.update:userId     		= ' + userId);
-   console.log('Orders.after.update:doc        		= ' + JSON.stringify(doc, null, 4));
-   console.log('Orders.after.update:fieldNames 		= ' + JSON.stringify(fieldNames, null, 4));
-   console.log('Orders.after.update:modifier   		= ' + JSON.stringify(modifier, null, 4));
-   console.log('Orders.after.update:options    		= ' + JSON.stringify(options, null, 4));
-   console.log('Orders.after.update:fieldNames[0] 	= ' + fieldNames[0]);
+   console.log('Orders.after.update:userId     = ' + userId);
+   console.log('Orders.after.update:doc        = ' + JSON.stringify(doc, null, 4));
+   console.log('Orders.after.update:fieldNames = ' + JSON.stringify(fieldNames, null, 4));
+   console.log('Orders.after.update:modifier   = ' + JSON.stringify(modifier, null, 4));
+   console.log('Orders.after.update:options    = ' + JSON.stringify(options, null, 4));
+   console.log('fieldNames[0]                  = ' + fieldNames[0]);
 
    if(fieldNames[0] !== "sheetRowId")
    {
