@@ -899,6 +899,10 @@ OrdersMeta.after.insert(function (userId, doc) {
     {
     	var hookSessionId = Meteor.uuid();
 
+    	//Testing the Clover Integration - Start 
+		processCategory (hookSessionId, doc, websheets.public.generic.GET_ALL);
+		//Testing the Clover Integration - End 
+
     	if(fieldNames[0] !== 'menuItemCount' &&  doc.Key !== 'totalMenuItemCount')
     	{
 
