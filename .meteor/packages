@@ -15,7 +15,6 @@ iron:router
 meteorhacks:npm
 
 
-npm-container
 jquery
 force-ssl
 matb33:collection-hooks
@@ -26,3 +25,6 @@ nimble:restivus
 okgrow:iron-router-autoscroll
 dandv:http-more
 gfk:mailgun-api
+
+
+npm-container

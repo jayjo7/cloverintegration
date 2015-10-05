@@ -368,11 +368,11 @@
     			result.status 		=  websheets.public.status.FAILED;
 				result.error		=  err;
 				result.errorStack   =  err.stack
-		  		console.log(sessionid + ": upsertSupportedTab: Caught error on upserting data from sheet", err);
-		  		console.log(sessionid + ": upsertSupportedTab: collectionName ( Tab Name ) = " + collectionName);
-		  		console.log(sessionid + ": upsertSupportedTab: UniqueId_key  	= " + UniqueId_key);
-		  		console.log(sessionid + ": upsertSupportedTab: Data      		= " + JSON.stringify(data, null, 4));
-		  		console.log(sessionid + ": upsertSupportedTab: Jay Todo: Send Email Notification to Webmaster and Owner");
+		  		console.log(sessionid + ": upsertSupportedTab (catch-block): Caught error on upserting data from sheet", err);
+		  		console.log(sessionid + ": upsertSupportedTab (catch-block): collectionName ( Tab Name ) = " + collectionName);
+		  		console.log(sessionid + ": upsertSupportedTab (catch-block): UniqueId_key  	= " + UniqueId_key);
+		  		console.log(sessionid + ": upsertSupportedTab (catch-block): Data      		= " + JSON.stringify(data, null, 4));
+		  		console.log(sessionid + ": upsertSupportedTab (catch-block): Jay Todo: Send Email Notification to Webmaster and Owner");
 		
 
     	}

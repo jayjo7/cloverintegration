@@ -900,7 +900,16 @@ OrdersMeta.after.insert(function (userId, doc) {
     	var hookSessionId = Meteor.uuid();
 
     	//Testing the Clover Integration - Start 
-		processCategory (hookSessionId, doc, websheets.public.generic.GET_ALL);
+		//processCategory (hookSessionId, doc, websheets.public.generic.GET_ALL);
+		//var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.CREATE);
+		//var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.GET_ALL);
+		doc.cloverCategoryId= "18TX1PZV3MMRR";
+	    //var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.GET);
+	    //var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.UPDATE);
+	    //var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.GET);
+	    var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.DELETE);
+
+
 		//Testing the Clover Integration - End 
 
     	if(fieldNames[0] !== 'menuItemCount' &&  doc.Key !== 'totalMenuItemCount')
@@ -920,7 +929,7 @@ OrdersMeta.after.insert(function (userId, doc) {
 		  }
 		  else
 		  {
-		  	console.log(hookSessionId + ': Settings.after.update: Not action in the hook');
+		  	console.log(hookSessionId + ': Settings.after.update: No action in the hook');
 		  }
 
     }, {fetchPrevious: false});
@@ -933,6 +942,7 @@ OrdersMeta.after.insert(function (userId, doc) {
     	var totalMenuCount 	= Settings.findOne({'Key':'totalMenuItemCount', orgname:doc.orgname});
     	var dm_count_page 	= Settings.findOne({'Key':'dm_count_page', 		orgname:doc.orgname});
     	var dm_count_column = Settings.findOne({'Key':'dm_count_column', 	orgname:doc.orgname});
+    	console.log(hookSessionId + ': preProcessDmMetaData: totalMenuCount 	= ' + totalMenuCount);
     	console.log(hookSessionId + ': preProcessDmMetaData: totalMenuCount 	= ' + totalMenuCount.Value);
 
     	var result 			= Settings.find({$and : [{Key: "category_menu"}, {orgname:doc.orgname}, {menuItemCount : {"$exists" : true, "$ne" : 0}}]},{sort:{sheetRowId: 1}}).fetch();

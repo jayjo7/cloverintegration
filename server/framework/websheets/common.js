@@ -316,6 +316,18 @@ orgCurrencyCode       = function(orgname)
                         {
                             return  Meteor.settings.public[orgname].currencyCode;
                         }; 
+cloverSystemApiKey       = function(orgname)
+                        {
+                            return  Meteor.settings.private[orgname].clover.apiKey;
+                        }; 
+cloverSystemUrl       = function(orgname)
+                        {
+                            return  Meteor.settings.private[orgname].clover.partialApiUrl;
+                        };                         
+cloverSystemMerchantId       = function(orgname)
+                        {
+                            return  Meteor.settings.private[orgname].clover.merchantId;
+                        }; 
 
 statusDescription = function (StatusCode) 
 {
