@@ -123,18 +123,7 @@ var sendSMS = function (sessionId, orderNumber, toPhoneNumber, bodyMessage, orgn
     console.log(sessionId +": sendSMS : orgTwilioFromPhoneNumber  = "   +  orgTwilioFromPhoneNumber);
     console.log(sessionId +": sendSMS : toPhoneNumber             = "   +  toPhoneNumber);
     console.log(sessionId +": sendSMS : bodyMessage               = "   +  bodyMessage);
-    //var toPhoneNumberE164 = Phoneformat.formatE164('US', '4257776970');
-    //var toPhoneNumberE164           = Phoneformat.formatE164(countryCode( orgname), toPhoneNumber);
-    //console.log(sessionId +": sendSMS : toPhoneNumberE164      = "   +  toPhoneNumberE164);
-    //var countryCode = orgCountryCode( orgname);
-    //console.log(sessionId +": sendSMS : countryCode      = "   +  countryCode);
 
-
-    //var toPhoneNumberE164           = Phoneformat.formatE164(countryCode, toPhoneNumber);
-    //console.log(sessionId +": sendSMS : toPhoneNumberE164      = "   +  toPhoneNumberE164);
-
-    //var twilioFromPhoneNumberE164   = Phoneformat.formatE164(countryCode, twilioFromPhoneNumber((orgname)));
-    //console.log(sessionId +": sendSMS : twilioFromPhoneNumberE164  = "   +  twilioFromPhoneNumberE164);
 
 
 
