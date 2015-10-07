@@ -893,14 +893,61 @@ OrdersMeta.after.insert(function (userId, doc) {
 
     }, {fetchPrevious: false});
 
+    Settings.after.insert (function (userId, doc) 
+    {
+    	var hookSessionId = Meteor.uuid();
+    	
+    	
+    	if( doc.Key === 'category_menu' )
+    	{
+	    	console.log(hookSessionId + ': Settings.after.insert:userId     	= ' + userId);
+			console.log(hookSessionId + ': Settings.after.insert:doc        	= ' + JSON.stringify(doc, null, 4));
 
+			var posResponse;
+
+			if(isPosSystemEnabled(doc.orgname) && doc.Value)
+			{
+				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
+				console.log(hookSessionId + ': Settings.after.insert:methodToCall    	= ' + methodToCall);
+				console.log(hookSessionId + ': Settings.after.insert:Craesting POS');
+				posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.CREATE);
+				console.log(hookSessionId + ': Settings.after.insert:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
+
+			}
+			else
+			{
+				console.log(hookSessionId + ': Settings.after.insert:POS System is not enabled for this client or the Vaule is empty : doc.orgname = ' + doc.orgname + 'doc.Value = ' + doc.Value);
+			}
+
+		   	console.log(hookSessionId +': Settings.after.insert : Category Name 		= ' + doc.Value);
+		   	var menuByCategoriesCount = Menu.find({'Category': doc.Value}).count();
+		   	console.log(hookSessionId +': Settings.after.insert : Menu Count by Category ' +  doc.Value +' = ' + menuByCategoriesCount);
+		   	if(posResponse.data.id)
+		   	{
+		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount, 'posId':posResponse.data.id}});
+		   	}
+		   	else
+		   	{
+		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount}});
+		   	}
+		   	preProcessDmMetaData(hookSessionId , doc);
+
+		}
+		 else
+		{ 
+		  	console.log(hookSessionId + ': Settings.after.insert: ***** No action in the hook *****');
+		}  
+		  
+
+
+    });
 
     Settings.after.update(function (userId, doc, fieldNames, modifier, options) 
     {
     	var hookSessionId = Meteor.uuid();
 
 
-    	if( modifier.Key == 'category_menu' )
+    	if( modifier.Key === 'category_menu' )
     	{
     		console.log(hookSessionId + ': Settings.after.update:this.previous 	= ' + JSON.stringify(this.previous, null, 4));
 	    	console.log(hookSessionId + ': Settings.after.update:userId     	= ' + userId);

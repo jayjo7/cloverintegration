@@ -31,7 +31,11 @@ Meteor.methods({
 
           case websheets.public.generic.CREATE:
 
-          		syncCloverPosCategoryDoc.categoryDoc =  { "name": doc.Value };
+          		syncCloverPosCategoryDoc.categoryDoc =  { 
+          													"sortOrder" : doc.sheetRowId,
+          													"name": doc.Value,
+          												  	"id"  : doc.UniqueId
+          												};
           		response = createCategory(syncCloverPosCategoryDoc);
 
                 break;
