@@ -1,53 +1,54 @@
 Meteor.methods({
 
 
-	syncPosCategory:function(sessionId, doc, operation)
+	syncCloverPosCategory:function(sessionId, doc, operation)
 	{
-		console.log(sessionId + ": syncPosCategory:operation: 			" + operation);
-    	console.log(sessionId + ": syncPosCategory:doc: 				" + JSON.stringify(doc, null, 4));
+		console.log(sessionId + ": syncCloverPosCategory:operation: 			" + operation);
+		console.log(sessionId + ": syncCloverPosCategory:doc.orgname: 		" + doc.orgname);
+    	console.log(sessionId + ": syncCloverPosCategory:doc: 				" + JSON.stringify(doc, null, 4));
 
-    	var syncPosCategoryDoc = {
+    	var syncCloverPosCategoryDoc = {
 
     		"sessionId": sessionId
     	}
 
 		var response 			= {};
-    	syncPosCategoryDoc.cloverUrl 			= cloverSystemUrl(doc.orgname);
-    	syncPosCategoryDoc.cloverApiKey    		= cloverSystemApiKey(doc.orgname);
-    	syncPosCategoryDoc.cloverMerchantId 	= cloverSystemMerchantId(doc.orgname);
-    	console.log(sessionId + ": syncPosCategory:syncPosCategoryDoc: 				" + JSON.stringify(syncPosCategoryDoc, null, 4));
+    	syncCloverPosCategoryDoc.cloverUrl 			= cloverSystemUrl(doc.orgname);
+    	syncCloverPosCategoryDoc.cloverApiKey    		= cloverSystemApiKey(doc.orgname);
+    	syncCloverPosCategoryDoc.cloverMerchantId 	= cloverSystemMerchantId(doc.orgname);
+    	console.log(sessionId + ": syncCloverPosCategory:syncCloverPosCategoryDoc: 				" + JSON.stringify(syncCloverPosCategoryDoc, null, 4));
       	switch (operation)
       	{
 
           case websheets.public.generic.GET:
-          		syncPosCategoryDoc.categoryDoc = {"id" : doc.cloverCategoryId};
-                response = getOneCategory(syncPosCategoryDoc)
+          		syncCloverPosCategoryDoc.categoryDoc = {"id" : doc.posId};
+                response = getOneCategory(syncCloverPosCategoryDoc)
                 break;
 
           case websheets.public.generic.GET_ALL:
-          		response = getAllCategory(syncPosCategoryDoc)
+          		response = getAllCategory(syncCloverPosCategoryDoc)
                 break;
 
           case websheets.public.generic.CREATE:
 
-          		syncPosCategoryDoc.categoryDoc =  { "name": doc.Value };
-          		response = createCategory(syncPosCategoryDoc);
+          		syncCloverPosCategoryDoc.categoryDoc =  { "name": doc.Value };
+          		response = createCategory(syncCloverPosCategoryDoc);
 
                 break;
 
           case websheets.public.generic.UPDATE:
 
-          		syncPosCategoryDoc.categoryDoc = {"name": doc.Value,"id" : doc.cloverCategoryId };
-				response = updateCategory(syncPosCategoryDoc);											
+          		syncCloverPosCategoryDoc.categoryDoc = {"name": doc.Value,"id" : doc.posId };
+				response = updateCategory(syncCloverPosCategoryDoc);											
                 break;
 
           case websheets.public.generic.DELETE:
-                syncPosCategoryDoc.categoryDoc = {"id" : doc.cloverCategoryId};
-               response = deleteCategory(syncPosCategoryDoc);	
+                syncCloverPosCategoryDoc.categoryDoc = {"id" : doc.posId};
+                response = deleteCategory(syncCloverPosCategoryDoc);	
                 break;                
           default:
             
-             console.log(sessionId + ": syncPosCategory: Sorry, Not a valid operation " + operation);
+             console.log(sessionId + ": syncCloverPosCategory: Sorry, Not a valid operation " + operation);
 
       	}
       	return response;
@@ -58,13 +59,13 @@ Meteor.methods({
 });
 
 
-getAllCategory = function(syncPosCategoryDoc )
+getAllCategory = function(syncCloverPosCategoryDoc )
 {
-	console.log(syncPosCategoryDoc.sessionId + ": getAllCategory:syncPosCategoryDoc: 				" + JSON.stringify(syncPosCategoryDoc, null, 4));
+	console.log(syncCloverPosCategoryDoc.sessionId + ": getAllCategory:syncCloverPosCategoryDoc: 				" + JSON.stringify(syncCloverPosCategoryDoc, null, 4));
 
 	var response 			={};
-	var cloverUrl = syncPosCategoryDoc.cloverUrl + '/' + syncPosCategoryDoc.cloverMerchantId +'/categories';
-	console.log(syncPosCategoryDoc.sessionId + " getAllCategory:cloverUrl = " + cloverUrl);
+	var cloverUrl = syncCloverPosCategoryDoc.cloverUrl + '/' + syncCloverPosCategoryDoc.cloverMerchantId +'/categories';
+	console.log(syncCloverPosCategoryDoc.sessionId + " getAllCategory:cloverUrl = " + cloverUrl);
 
 	try{
   				
@@ -72,19 +73,19 @@ getAllCategory = function(syncPosCategoryDoc )
   			  				{
   			  					headers: 
   			  					{
-  			  						'Authorization' : 'Bearer ' + syncPosCategoryDoc.cloverApiKey 
+  			  						'Authorization' : 'Bearer ' + syncCloverPosCategoryDoc.cloverApiKey 
   			  					}
 							});
 
-        console.log(syncPosCategoryDoc.sessionId +": getAllCategory:response:: " +JSON.stringify(response, null, 4));
-		console.log(syncPosCategoryDoc.sessionId +": getAllCategory:Done invoking HTTP.get to clover to get all the categories for merchant id : " + syncPosCategoryDoc.cloverMerchantId );
+        console.log(syncCloverPosCategoryDoc.sessionId +": getAllCategory:response:: " +JSON.stringify(response, null, 4));
+		console.log(syncCloverPosCategoryDoc.sessionId +": getAllCategory:Done invoking HTTP.get to clover to get all the categories for merchant id : " + syncCloverPosCategoryDoc.cloverMerchantId );
   		if(response.statusCode != 200)
   		{
-  			console.log(syncPosCategoryDoc.sessionId +'getAllCategory-Failed', 'Get All Category failed with http status code [' + response.statusCode  + ']', e);
+  			console.log(syncCloverPosCategoryDoc.sessionId +'getAllCategory-Failed', 'Get All Category failed with http status code [' + response.statusCode  + ']', e);
   		}
         else
         {
-            console.log(syncPosCategoryDoc.sessionId +": getAllCategory:response.content:: " +JSON.stringify(response.content, null, 4));
+            console.log(syncCloverPosCategoryDoc.sessionId +": getAllCategory:response.content:: " +JSON.stringify(response.content, null, 4));
 
         }
 
@@ -92,12 +93,12 @@ getAllCategory = function(syncPosCategoryDoc )
 		}catch (e)
 		{
 			console.log(sessionId + ': getAllCategory-Failed', 'Could not GET All category failed', e);
-			response.sessionId 				= syncPosCategoryDoc.sessionId;
+			response.sessionId 				= syncCloverPosCategoryDoc.sessionId;
 			response.cloverError 			= e;
       		response.clover  				= false;
       		response.cloverAction 			= 'getAllCategory';
       		response.cloverUrl      		= cloverUrl;
-      		response.syncPosCategoryDoc 	= syncPosCategoryDoc;
+      		response.syncCloverPosCategoryDoc 	= syncCloverPosCategoryDoc;
 
 		}
 
@@ -107,13 +108,13 @@ getAllCategory = function(syncPosCategoryDoc )
 
 
 
-getOneCategory = function(syncPosCategoryDoc)
+getOneCategory = function(syncCloverPosCategoryDoc)
 {
-	console.log(syncPosCategoryDoc.sessionId + ": getOneCategory:syncPosCategoryDoc: 				" + JSON.stringify(syncPosCategoryDoc, null, 4));
+	console.log(syncCloverPosCategoryDoc.sessionId + ": getOneCategory:syncCloverPosCategoryDoc: 				" + JSON.stringify(syncCloverPosCategoryDoc, null, 4));
 
 	var response 			={};
-	cloverUrl = syncPosCategoryDoc.cloverUrl + '/' + syncPosCategoryDoc.cloverMerchantId +'/categories/'+ syncPosCategoryDoc.categoryDoc.id;
-	console.log(syncPosCategoryDoc.sessionId + " getOneCategory:cloverUrl = " + cloverUrl);
+	cloverUrl = syncCloverPosCategoryDoc.cloverUrl + '/' + syncCloverPosCategoryDoc.cloverMerchantId +'/categories/'+ syncCloverPosCategoryDoc.categoryDoc.id;
+	console.log(syncCloverPosCategoryDoc.sessionId + " getOneCategory:cloverUrl = " + cloverUrl);
 
 	try{
   				
@@ -121,32 +122,32 @@ getOneCategory = function(syncPosCategoryDoc)
   			  				{
   			  					headers: 
   			  					{
-  			  						'Authorization' : 'Bearer ' + syncPosCategoryDoc.cloverApiKey 
+  			  						'Authorization' : 'Bearer ' + syncCloverPosCategoryDoc.cloverApiKey 
   			  					}
 							});
 
-        console.log(syncPosCategoryDoc.sessionId +": getOneCategory:response:: " +JSON.stringify(response, null, 4));
-		console.log(syncPosCategoryDoc.sessionId + ": getOneCategory:Done invoking HTTP.get to clover to get one category: " + syncPosCategoryDoc.categoryDoc.id +" for merchant id : " + syncPosCategoryDoc.cloverMerchantId );
+        console.log(syncCloverPosCategoryDoc.sessionId +": getOneCategory:response:: " +JSON.stringify(response, null, 4));
+		console.log(syncCloverPosCategoryDoc.sessionId + ": getOneCategory:Done invoking HTTP.get to clover to get one category: " + syncCloverPosCategoryDoc.categoryDoc.id +" for merchant id : " + syncCloverPosCategoryDoc.cloverMerchantId );
   		if(response.statusCode != 200)
   		{
-  			console.log(syncPosCategoryDoc.sessionId +'getOneCategory-Failed', 'Get One Category failed with http status code [' + response.statusCode  + ']', e);
+  			console.log(syncCloverPosCategoryDoc.sessionId +'getOneCategory-Failed', 'Get One Category failed with http status code [' + response.statusCode  + ']', e);
   		}
         else
         {
-            console.log(syncPosCategoryDoc.sessionId +": getOneCategory:response.content:: " +JSON.stringify(response.content, null, 4));
+            console.log(syncCloverPosCategoryDoc.sessionId +": getOneCategory:response.content:: " +JSON.stringify(response.content, null, 4));
 
         }
 
 							
 		}catch (e)
 		{ 
-			console.log(syncPosCategoryDoc.sessionId + ': getOneCategory-Failed', 'Could not GET One category failed', e);
-			response.sessionId 				= syncPosCategoryDoc.sessionId;
+			console.log(syncCloverPosCategoryDoc.sessionId + ': getOneCategory-Failed', 'Could not GET One category failed', e);
+			response.sessionId 				= syncCloverPosCategoryDoc.sessionId;
 			response.cloverError 			= e;
       		response.clover  				= false;
       		response.cloverAction 			= 'getOneCategory';
       		response.cloverUrl      		= cloverUrl;
-      		response.syncPosCategoryDoc 	= syncPosCategoryDoc;
+      		response.syncCloverPosCategoryDoc 	= syncCloverPosCategoryDoc;
 
 		}
 
@@ -155,48 +156,48 @@ getOneCategory = function(syncPosCategoryDoc)
 }
 
 
-createCategory = function(syncPosCategoryDoc)
+createCategory = function(syncCloverPosCategoryDoc)
 {
-	console.log(syncPosCategoryDoc.sessionId + ": createCategory:syncPosCategoryDoc: 				" + JSON.stringify(syncPosCategoryDoc, null, 4));
+	console.log(syncCloverPosCategoryDoc.sessionId + ": createCategory:syncCloverPosCategoryDoc: 				" + JSON.stringify(syncCloverPosCategoryDoc, null, 4));
 
 	var response 			={};
-	var cloverUrl = syncPosCategoryDoc.cloverUrl + '/' + syncPosCategoryDoc.cloverMerchantId +'/categories';
-	console.log(syncPosCategoryDoc.sessionId + " createCategory:cloverUrl 			= " + cloverUrl);
+	var cloverUrl = syncCloverPosCategoryDoc.cloverUrl + '/' + syncCloverPosCategoryDoc.cloverMerchantId +'/categories';
+	console.log(syncCloverPosCategoryDoc.sessionId + " createCategory:cloverUrl 			= " + cloverUrl);
 
 
 	try{
 
   		response = HTTP.post(cloverUrl,
   			  				{
-  			  					data   	: syncPosCategoryDoc.categoryDoc,
+  			  					data   	: syncCloverPosCategoryDoc.categoryDoc,
   			  					headers	: 
   			  					{
-  			  						'Authorization' : 'Bearer ' + syncPosCategoryDoc.cloverApiKey 
+  			  						'Authorization' : 'Bearer ' + syncCloverPosCategoryDoc.cloverApiKey 
   			  					}
 							});
 
-        console.log(syncPosCategoryDoc.sessionId +": createCategory:response:: " +JSON.stringify(response, null, 4));
-		console.log(syncPosCategoryDoc.sessionId + ": createCategory:Done invoking HTTP.post to clover to create a category: " + syncPosCategoryDoc.categoryDoc.name+ " for merchant id : " + syncPosCategoryDoc.cloverMerchantId );
+        console.log(syncCloverPosCategoryDoc.sessionId +": createCategory:response:: " +JSON.stringify(response, null, 4));
+		console.log(syncCloverPosCategoryDoc.sessionId + ": createCategory:Done invoking HTTP.post to clover to create a category: " + syncCloverPosCategoryDoc.categoryDoc.name+ " for merchant id : " + syncCloverPosCategoryDoc.cloverMerchantId );
   		if(response.statusCode != 200)
   		{
-  			console.log(syncPosCategoryDoc.sessionId +'createCategory-Failed', 'Get One Category failed with http status code [' + response.statusCode  + ']', e);
+  			console.log(syncCloverPosCategoryDoc.sessionId +'createCategory-Failed', 'Get One Category failed with http status code [' + response.statusCode  + ']', e);
   		}
         else
         {
-            console.log(syncPosCategoryDoc.sessionId +": createCategory:response.content:: " +JSON.stringify(response.content, null, 4));
+            console.log(syncCloverPosCategoryDoc.sessionId +": createCategory:response.content:: " +JSON.stringify(response.content, null, 4));
 
         }
 
 							
 		}catch (e)
 		{
-			console.log(syncPosCategoryDoc.sessionId + ': createCategory-Failed', 'Could not create category failed', e);
-			response.sessionId 				=syncPosCategoryDoc.sessionId;
+			console.log(syncCloverPosCategoryDoc.sessionId + ': createCategory-Failed', 'Could not create category failed', e);
+			response.sessionId 				=syncCloverPosCategoryDoc.sessionId;
 			response.cloverError 			= e;
       		response.clover  				= false;
       		response.cloverAction 			= 'createCategory';
       		response.cloverUrl      		= cloverUrl;
-      		response.syncPosCategoryDoc 	= syncPosCategoryDoc;
+      		response.syncCloverPosCategoryDoc 	= syncCloverPosCategoryDoc;
 
 		}
 
@@ -204,13 +205,13 @@ createCategory = function(syncPosCategoryDoc)
 
 }
 
-updateCategory = function(syncPosCategoryDoc )
+updateCategory = function(syncCloverPosCategoryDoc )
 {
-	console.log(syncPosCategoryDoc.sessionId + ": updateCategory:syncPosCategoryDoc: " + JSON.stringify(syncPosCategoryDoc, null, 4));
+	console.log(syncCloverPosCategoryDoc.sessionId + ": updateCategory:syncCloverPosCategoryDoc: " + JSON.stringify(syncCloverPosCategoryDoc, null, 4));
 
 	var response 			={};
-	var cloverUrl = syncPosCategoryDoc.cloverUrl + '/' + syncPosCategoryDoc.cloverMerchantId +'/categories/'+syncPosCategoryDoc.categoryDoc.id;
-	console.log(syncPosCategoryDoc.sessionId + " updateCategory:cloverUrl 			= " + cloverUrl);
+	var cloverUrl = syncCloverPosCategoryDoc.cloverUrl + '/' + syncCloverPosCategoryDoc.cloverMerchantId +'/categories/'+syncCloverPosCategoryDoc.categoryDoc.id;
+	console.log(syncCloverPosCategoryDoc.sessionId + " updateCategory:cloverUrl 			= " + cloverUrl);
 
 
 	try{
@@ -218,35 +219,35 @@ updateCategory = function(syncPosCategoryDoc )
 		
   		response = HTTP.post(cloverUrl,
   			  				{
-  			  					data   	: syncPosCategoryDoc.categoryDoc,
+  			  					data   	: syncCloverPosCategoryDoc.categoryDoc,
   			  					headers	: 
   			  					{
-  			  						'Authorization' : 'Bearer ' + syncPosCategoryDoc.cloverApiKey 
+  			  						'Authorization' : 'Bearer ' + syncCloverPosCategoryDoc.cloverApiKey 
   			  					}
 							});
 
-        console.log(syncPosCategoryDoc.sessionId +": updateCategory:response:: " +JSON.stringify(response, null, 4));
-		console.log(syncPosCategoryDoc.sessionId + ": updateCategory:Done invoking HTTP.post to clover to update a category: " + syncPosCategoryDoc.categoryDoc.id + " for merchant id : " + syncPosCategoryDoc.cloverMerchantId );
+        console.log(syncCloverPosCategoryDoc.sessionId +": updateCategory:response:: " +JSON.stringify(response, null, 4));
+		console.log(syncCloverPosCategoryDoc.sessionId + ": updateCategory:Done invoking HTTP.post to clover to update a category: " + syncCloverPosCategoryDoc.categoryDoc.id + " for merchant id : " + syncCloverPosCategoryDoc.cloverMerchantId );
   		if(response.statusCode != 200)
   		{
-  			console.log(syncPosCategoryDoc.sessionId +'updateCategory-Failed', 'Update Category failed with http status code [' + response.statusCode  + ']', e);
+  			console.log(syncCloverPosCategoryDoc.sessionId +'updateCategory-Failed', 'Update Category failed with http status code [' + response.statusCode  + ']', e);
   		}
         else
         {
-            console.log(syncPosCategoryDoc.sessionId +": updateCategory:response.content:: " +JSON.stringify(response.content, null, 4));
+            console.log(syncCloverPosCategoryDoc.sessionId +": updateCategory:response.content:: " +JSON.stringify(response.content, null, 4));
 
         }
 
 							
 		}catch (e)
 		{
-			console.log(syncPosCategoryDoc.sessionId + ': updateCategory-Failed', 'Could not update category, failed', e);
-			response.sessionId 				=syncPosCategoryDoc.sessionId;
+			console.log(syncCloverPosCategoryDoc.sessionId + ': updateCategory-Failed', 'Could not update category, failed', e);
+			response.sessionId 				=syncCloverPosCategoryDoc.sessionId;
 			response.cloverError 			= e;
       		response.clover  				= false;
       		response.cloverAction 			= 'updateCategory';
       		response.cloverUrl      		= cloverUrl;
-      		response.syncPosCategoryDoc 	= syncPosCategoryDoc;
+      		response.syncCloverPosCategoryDoc 	= syncCloverPosCategoryDoc;
 
 		}
 
@@ -255,13 +256,13 @@ updateCategory = function(syncPosCategoryDoc )
 }
 
 
-deleteCategory = function(syncPosCategoryDoc )
+deleteCategory = function(syncCloverPosCategoryDoc )
 {
-	console.log(syncPosCategoryDoc.sessionId + ": deleteCategory:syncPosCategoryDoc: " + JSON.stringify(syncPosCategoryDoc, null, 4));
+	console.log(syncCloverPosCategoryDoc.sessionId + ": deleteCategory:syncCloverPosCategoryDoc: " + JSON.stringify(syncCloverPosCategoryDoc, null, 4));
 
 	var response 			={};
-	var cloverUrl = syncPosCategoryDoc.cloverUrl + '/' + syncPosCategoryDoc.cloverMerchantId +'/categories/'+syncPosCategoryDoc.categoryDoc.id;
-	console.log(syncPosCategoryDoc.sessionId + " deleteCategory:cloverUrl 			= " + cloverUrl);
+	var cloverUrl = syncCloverPosCategoryDoc.cloverUrl + '/' + syncCloverPosCategoryDoc.cloverMerchantId +'/categories/'+syncCloverPosCategoryDoc.categoryDoc.id;
+	console.log(syncCloverPosCategoryDoc.sessionId + " deleteCategory:cloverUrl 			= " + cloverUrl);
 
 
 	try{
@@ -271,32 +272,32 @@ deleteCategory = function(syncPosCategoryDoc )
   			  				{
   			  					headers	: 
   			  					{
-  			  						'Authorization' : 'Bearer ' + syncPosCategoryDoc.cloverApiKey 
+  			  						'Authorization' : 'Bearer ' + syncCloverPosCategoryDoc.cloverApiKey 
   			  					}
 							});
 
-        console.log(syncPosCategoryDoc.sessionId + ": deleteCategory:response:: " +JSON.stringify(response, null, 4));
-		console.log(syncPosCategoryDoc.sessionId + ": deleteCategory:Done invoking HTTP.post to clover to delete a category: " + syncPosCategoryDoc.categoryDoc.id + " for merchant id : " + syncPosCategoryDoc.cloverMerchantId );
+        console.log(syncCloverPosCategoryDoc.sessionId + ": deleteCategory:response:: " +JSON.stringify(response, null, 4));
+		console.log(syncCloverPosCategoryDoc.sessionId + ": deleteCategory:Done invoking HTTP.post to clover to delete a category: " + syncCloverPosCategoryDoc.categoryDoc.id + " for merchant id : " + syncCloverPosCategoryDoc.cloverMerchantId );
   		if(response.statusCode != 200)
   		{
-  			console.log(syncPosCategoryDoc.sessionId +'deleteCategory-Failed', ' Delete Category Category failed with http status code [' + response.statusCode  + ']', e);
+  			console.log(syncCloverPosCategoryDoc.sessionId +'deleteCategory-Failed', ' Delete Category Category failed with http status code [' + response.statusCode  + ']', e);
   		}
         else
         {
-            console.log(syncPosCategoryDoc.sessionId +": deleteCategory:response.content:: " +JSON.stringify(response.content, null, 4));
+            console.log(syncCloverPosCategoryDoc.sessionId +": deleteCategory:response.content:: " +JSON.stringify(response.content, null, 4));
 
         }
 
 							
 		}catch (e)
 		{
-			console.log(syncPosCategoryDoc.sessionId + ': deleteCategory-Failed', 'Could not delete category, failed', e);
-			response.sessionId 				=syncPosCategoryDoc.sessionId;
+			console.log(syncCloverPosCategoryDoc.sessionId + ': deleteCategory-Failed', 'Could not delete category, failed', e);
+			response.sessionId 				=syncCloverPosCategoryDoc.sessionId;
 			response.cloverError 			= e;
       		response.clover  				= false;
       		response.cloverAction 			= 'deleteCategory';
       		response.cloverUrl      		= cloverUrl;
-      		response.syncPosCategoryDoc 	= syncPosCategoryDoc;
+      		response.syncCloverPosCategoryDoc 	= syncCloverPosCategoryDoc;
 
 		}
 

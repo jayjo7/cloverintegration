@@ -238,9 +238,9 @@ isEmailCustomer       = function(orgname)
                           };                                               
 
 
-isOrderSystemEnabled    = function(orgname)
+isPosSystemEnabled    = function(orgname)
                           {
-                            if('ENABLED' === Meteor.settings.private[orgname].orderSystem.toUpperCase())
+                            if('ENABLED' === Meteor.settings.private[orgname].posSystem.toUpperCase())
                             {
                               return true;
                             }
@@ -251,9 +251,21 @@ isOrderSystemEnabled    = function(orgname)
                           };     
 
 
-isOrderSystemClover     = function(orgname) 
+isPosSystemClover     = function(orgname) 
                           {
-                              if('CLOVER' === Meteor.settings.public[orgname].orderProcessor.toUpperCase())
+                              if('CLOVER' === Meteor.settings.private[orgname].posProcessor.toUpperCase())
+                              {
+                                  return true;
+                                }
+                              else
+                              
+                              {
+                                  return false;
+                              }
+                          };
+isPosSystemSquare	    = function(orgname) 
+                          {
+                              if('SQUARE' === Meteor.settings.private[orgname].posProcessor.toUpperCase())
                               {
                                   return true;
                               }
@@ -262,20 +274,9 @@ isOrderSystemClover     = function(orgname)
                                   return false;
                               }
                           };
-isOrderSystemSquare	    = function(orgname) 
+isPosSystemLightSpeed	= function(orgname) 
                           {
-                              if('SQUARE' === Meteor.settings.public[orgname].orderProcessor.toUpperCase())
-                              {
-                                  return true;
-                              }
-                              else
-                              {
-                                  return false;
-                              }
-                          };
-isOrderSystemLightSpeed	= function(orgname) 
-                          {
-                              if('LIGHTSPEED' === Meteor.settings.public[orgname].orderProcessor.toUpperCase())
+                              if('LIGHTSPEED' === Meteor.settings.private[orgname].posProcessor.toUpperCase())
                               {
                                   return true;
                               }
@@ -295,7 +296,7 @@ isPrinterEnabled		    = function(orgname)
                             {
                               return false;
                             }
-                          };            
+                          };                                        
 
 gmtOffset              = function(orgname)
                           {

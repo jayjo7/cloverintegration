@@ -57,7 +57,7 @@
 
 								if( isSupportedTab(key))
 								{
-
+									console.log(sessionid + ': sheetSync: Yes, the "' + key + '" is supported tab, meaning we have corresponding collection in Mongodb' );
 									result = upsertSupportedTab(key, data[i], websheets.private.generic.UNIQUE_ID_NAME, websheets.private.generic.ORG_KEY_NAME, sessionid)
 
 								}
@@ -151,7 +151,7 @@
 
 						if(isSupportedTab(key))
 						{
-
+							console.log(sessionid + ': sheetSyncFull: Yes, the "' + key + '" is supported tab, meaning we have corresponding collection in Mongodb' );
 							var resultProcessSupportedTab = processSupportedTab (key, data, websheets.private.generic.UNIQUE_ID_NAME, websheets.private.generic.ORG_KEY_NAME, sessionid);
 							for (keyResultProcessSupportedTab in resultProcessSupportedTab)
 							{

@@ -899,42 +899,96 @@ OrdersMeta.after.insert(function (userId, doc) {
     {
     	var hookSessionId = Meteor.uuid();
 
-    	//Testing the Clover Integration - Start 
-		//processCategory (hookSessionId, doc, websheets.public.generic.GET_ALL);
-		//var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.CREATE);
-		//var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.GET_ALL);
-		doc.cloverCategoryId= "18TX1PZV3MMRR";
-	    //var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.GET);
-	    //var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.UPDATE);
-	    //var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.GET);
-	    var response = Meteor.call('syncPosCategory', hookSessionId, doc, websheets.public.generic.DELETE);
 
-
-		//Testing the Clover Integration - End 
-
-    	if(fieldNames[0] !== 'menuItemCount' &&  doc.Key !== 'totalMenuItemCount')
+    	if( modifier.Key == 'category_menu' )
     	{
+    		console.log(hookSessionId + ': Settings.after.update:this.previous 	= ' + JSON.stringify(this.previous, null, 4));
+	    	console.log(hookSessionId + ': Settings.after.update:userId     	= ' + userId);
+			console.log(hookSessionId + ': Settings.after.update:doc        	= ' + JSON.stringify(doc, null, 4));
+			console.log(hookSessionId + ': Settings.after.update:fieldNames 	= ' + JSON.stringify(fieldNames, null, 4));
+			console.log(hookSessionId + ': Settings.after.update:modifier   	= ' + JSON.stringify(modifier, null, 4));
+			console.log(hookSessionId + ': Settings.after.update:options    	= ' + JSON.stringify(options, null, 4));
 
-    	   console.log(hookSessionId + ': Settings.after.update:userId     = ' + userId);
-		   console.log(hookSessionId + ': Settings.after.update:doc        = ' + JSON.stringify(doc, null, 4));
-		   console.log(hookSessionId + ': Settings.after.update:fieldNames = ' + JSON.stringify(fieldNames, null, 4));
-		   console.log(hookSessionId + ': Settings.after.update:modifier   = ' + JSON.stringify(modifier, null, 4));
-		   console.log(hookSessionId + ': Settings.after.update:options    = ' + JSON.stringify(options, null, 4));
+			var posResponse;
 
-		   		console.log('Settings.after.update : Category Name 		= ' + doc.Value);
-		   		var menuByCategoriesCount = Menu.find({'Category': doc.Value}).count();
-		   		console.log('Settings.after.update : Menu Count by Category ' +  doc.Value +' = ' + menuByCategoriesCount);
+			if(isPosSystemEnabled(doc.orgname))
+			{
+				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
+				console.log(hookSessionId + ': Settings.after.update:methodToCall    	= ' + methodToCall);
+
+				if(this.previous.posId)
+				{
+			    	console.log(hookSessionId + ': Settings.after.update:updating POS = ' + this.previous.posId);
+			    	doc.posId = this.previous.posId;
+			    	posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.UPDATE);
+
+				}
+				else
+				{
+					console.log(hookSessionId + ': Settings.after.update:Craesting POS');
+					posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.CREATE);
+
+				}
+
+				console.log(hookSessionId + ': Settings.after.update:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
+
+			}
+			else
+			{
+				console.log(hookSessionId + ': Settings.after.update:POS System is not enabled for this client:' + doc.orgname);
+			}
+
+		   	console.log(hookSessionId +': Settings.after.update : Category Name 		= ' + doc.Value);
+		   	var menuByCategoriesCount = Menu.find({'Category': doc.Value}).count();
+		   	console.log(hookSessionId +': Settings.after.update : Menu Count by Category ' +  doc.Value +' = ' + menuByCategoriesCount);
+		   	if(posResponse.data.id)
+		   	{
+		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount, 'posId':posResponse.data.id}});
+		   	}
+		   	else
+		   	{
 		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount}});
-		   		preProcessDmMetaData(hookSessionId , doc);
-		  }
-		  else
-		  {
-		  	console.log(hookSessionId + ': Settings.after.update: No action in the hook');
-		  }
+		   	}
+		   	preProcessDmMetaData(hookSessionId , doc);
 
-    }, {fetchPrevious: false});
+		}
+		 else
+		{ 
+		  	console.log(hookSessionId + ': Settings.after.update: ***** No action in the hook *****');
+		}  
+		  
 
 
+    }, {fetchPrevious: true});
+
+Settings.after.remove(function (userId, doc) {
+
+    var hookSessionId = Meteor.uuid();
+   	console.log(hookSessionId + ': Settings.after.remove:userId     	= ' + userId);
+	console.log(hookSessionId + ': Settings.after.remove:doc        	= ' + JSON.stringify(doc, null, 4));
+	var posResponse;
+
+	if(isPosSystemEnabled(doc.orgname))
+	{
+		if(doc.posId)
+		{
+			var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
+			console.log(hookSessionId + ': Settings.after.remove:methodToCall    	= ' + methodToCall);
+			console.log(hookSessionId + ': Settings.after.remove:deleting POS' + doc.posId);
+			posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.DELETE);
+
+		}
+		else
+		{
+			console.log(hookSessionId + ': Settings.after.remove: No posId associated to this doc in database...no Action taken' );
+
+		}
+
+
+	}
+
+
+});
 
 
     preProcessDmMetaData = function(hookSessionId , doc)
