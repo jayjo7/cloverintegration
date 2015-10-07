@@ -907,10 +907,16 @@ OrdersMeta.after.insert(function (userId, doc) {
 
 			if(isPosSystemEnabled(doc.orgname) && doc.Value)
 			{
-				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
+				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
+				var syncCloverPosDoc = {
+       										"doc":doc,
+											"sessionId": hookSessionId,
+      										"component": "categories",
+      										"operation": websheets.public.generic.CREATE
+										}
 				console.log(hookSessionId + ': Settings.after.insert:methodToCall    	= ' + methodToCall);
-				console.log(hookSessionId + ': Settings.after.insert:Craesting POS');
-				posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.CREATE);
+				console.log(hookSessionId + ': Settings.after.insert:Creating POS category');
+				posResponse = Meteor.call(methodToCall, syncCloverPosDoc);
 				console.log(hookSessionId + ': Settings.after.insert:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
 
 			}
@@ -963,20 +969,26 @@ OrdersMeta.after.insert(function (userId, doc) {
 				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
 				console.log(hookSessionId + ': Settings.after.update:methodToCall    	= ' + methodToCall);
 
+				var syncCloverPosDoc = {
+       										"doc":doc,
+											"sessionId": hookSessionId,
+      										"component": "categories"
+										}
+
 				if(this.previous.posId)
 				{
-			    	console.log(hookSessionId + ': Settings.after.update:updating POS = ' + this.previous.posId);
+			    	console.log(hookSessionId + ': Settings.after.update:updating POS Category= ' + this.previous.posId);
 			    	doc.posId = this.previous.posId;
-			    	posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.UPDATE);
+			    	syncCloverPosDoc.operation= websheets.public.generic.UPDATE;
 
 				}
 				else
 				{
-					console.log(hookSessionId + ': Settings.after.update:Craesting POS');
-					posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.CREATE);
+					console.log(hookSessionId + ': Settings.after.update:Creating POS Category');
+					syncCloverPosDoc.operation = websheets.public.generic.CREATE;
 
 				}
-
+				posResponse = Meteor.call(methodToCall, syncCloverPosDoc);
 				console.log(hookSessionId + ': Settings.after.update:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
 
 			}
