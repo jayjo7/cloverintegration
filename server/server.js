@@ -911,7 +911,7 @@ OrdersMeta.after.insert(function (userId, doc) {
 
 			var posResponse;
 
-			if(isPosSystemEnabled(doc.orgname))
+			if(isPosSystemEnabled(doc.orgname) && doc.Value)
 			{
 				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
 				console.log(hookSessionId + ': Settings.after.update:methodToCall    	= ' + methodToCall);
@@ -935,7 +935,7 @@ OrdersMeta.after.insert(function (userId, doc) {
 			}
 			else
 			{
-				console.log(hookSessionId + ': Settings.after.update:POS System is not enabled for this client:' + doc.orgname);
+				console.log(hookSessionId + ': Settings.after.update:POS System is not enabled for this client or the Vaule is empty : doc.orgname = ' + doc.orgname + 'doc.Value = ' + doc.Value);
 			}
 
 		   	console.log(hookSessionId +': Settings.after.update : Category Name 		= ' + doc.Value);
