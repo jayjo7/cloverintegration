@@ -296,7 +296,19 @@ isPrinterEnabled		    = function(orgname)
                             {
                               return false;
                             }
-                          };                                        
+                          };      
+
+isPreProcessForDigitalMenuEnabled       = function(orgname)
+                                          {   
+                                              if('ENABLED' === Meteor.settings.private[orgname].preProcessForDigitalMenu.toUpperCase())
+                                              {
+                                                return true;
+                                              }
+                                              else
+                                              {
+                                                return false;
+                                              }
+                                            };                                                             
 
 gmtOffset              = function(orgname)
                           {

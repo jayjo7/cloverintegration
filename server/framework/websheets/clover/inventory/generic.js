@@ -1,6 +1,6 @@
 Meteor.methods({
 
-       //syncCloverPosDoc = {
+       //syncPosDoc = {
       //  "doc":doc
       //  "sessionId": sessionId,
       //  "component": component,
@@ -8,83 +8,84 @@ Meteor.methods({
       //}
 
 
-syncCloverPos: function (syncCloverPosDoc)
+syncCloverPos: function (syncPosDoc)
 {
-    console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:doc.orgname:    " + syncCloverPosDoc.doc.orgname);
-    console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:doc:            " + JSON.stringify(syncCloverPosDoc, null, 4));
-    var response =
-    {
-    };
+
+    console.log(syncPosDoc.sessionId + ": syncCloverPos:doc.orgname:    " + syncPosDoc.doc.orgname);
+    console.log(syncPosDoc.sessionId + ": syncCloverPos:doc:            " + JSON.stringify(syncPosDoc, null, 4));
+    var response= {};
     
-    
-    
-    syncCloverPosDoc.cloverApiKey = cloverSystemApiKey(syncCloverPosDoc.doc.orgname);
-    syncCloverPosDoc.cloverMerchantId = cloverSystemMerchantId(syncCloverPosDoc.doc.orgname);
-    syncCloverPosDoc.cloverUrl = cloverSystemUrl(syncCloverPosDoc.doc.orgname) + '/' + syncCloverPosDoc.cloverMerchantId + '/' + syncCloverPosDoc.component;
+  
+    syncPosDoc.cloverApiKey = cloverSystemApiKey(syncPosDoc.doc.orgname);
+    syncPosDoc.cloverMerchantId = cloverSystemMerchantId(syncPosDoc.doc.orgname);
+    syncPosDoc.cloverUrl = cloverSystemUrl(syncPosDoc.doc.orgname) + '/' + syncPosDoc.cloverMerchantId + '/' + syncPosDoc.component;
     
     
     
     try
     {
         
-        switch (syncCloverPosDoc.operation)
+        switch (syncPosDoc.operation)
         {
             
             case websheets. public.generic.GET:
             {
             
-                syncCloverPosDoc.cloverUrl += syncCloverPosDoc.doc.posId;
-                console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
-                response = HTTP.get(syncCloverPosDoc.cloverUrl, {headers:{'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey}});
+                syncPosDoc.cloverUrl += syncPosDoc.doc.posId;
+                console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));
+                response = HTTP.get(syncPosDoc.cloverUrl, {headers:{'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
             
                 break;
             }
 
             case websheets. public.generic.GET_ALL:
             {
-                console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
-                response = HTTP.get(syncCloverPosDoc.cloverUrl, { headers:{'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey}});
+                console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));
+                response = HTTP.get(syncPosDoc.cloverUrl, { headers:{'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
             
                 break;
             }
 
             case websheets. public.generic.CREATE:
             {
-                console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
             
-               syncCloverPosDoc.categoryDoc ={
-                                                "sortOrder": syncCloverPosDoc.doc.sheetRowId,
-                                                "name": syncCloverPosDoc.doc.Value,
-                                                "id": syncCloverPosDoc.doc.UniqueId
+                syncPosDoc.categoryDoc ={
+                                                "sortOrder": syncPosDoc.doc.sheetRowId,
+                                                "name": syncPosDoc.doc.Value,
+                                                "id": syncPosDoc.doc.UniqueId
                                               };
-                response = HTTP.post(syncCloverPosDoc.cloverUrl,{ data: syncCloverPosDoc.categoryDoc, headers:{ 'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey}});
+                console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));               
+                response = HTTP.post(syncPosDoc.cloverUrl,{ data: syncPosDoc.categoryDoc, headers:{ 'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
                 break;
             }
 
             case websheets. public.generic.UPDATE:
             {
-                syncCloverPosDoc.cloverUrl = syncCloverPosDoc.cloverUrl +'/'+ syncCloverPosDoc.doc.posId;
-                syncCloverPosDoc.categoryDoc ={ "name": syncCloverPosDoc.doc.Value, "id": syncCloverPosDoc.doc.posId};
-                console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
+                syncPosDoc.cloverUrl = syncPosDoc.cloverUrl +'/'+ syncPosDoc.doc.posId;
+                syncPosDoc.categoryDoc ={ 
+                                            "name": syncPosDoc.doc.Value, 
+                                            "id": syncPosDoc.doc.posId
+                                        };
+                console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));
             
-                response = HTTP.post(syncCloverPosDoc.cloverUrl,{data: syncCloverPosDoc.categoryDoc,headers:{'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey}});
+                response = HTTP.post(syncPosDoc.cloverUrl,{data: syncPosDoc.categoryDoc,headers:{'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
                 break;
             }
             
             case websheets. public.generic. DELETE:
             {
-                syncCloverPosDoc.cloverUrl = syncCloverPosDoc.cloverUrl +'/'+ syncCloverPosDoc.doc.posId;
+                syncPosDoc.cloverUrl = syncPosDoc.cloverUrl +'/'+ syncPosDoc.doc.posId;
             
-                syncCloverPosDoc.categoryDoc =  {
-                                                  "id": syncCloverPosDoc.doc.posId
-                                                };
+                syncPosDoc.categoryDoc =  {
+                                              "id": syncPosDoc.doc.posId
+                                          };
 
-                console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
+                console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));
             
-                response = HTTP.del(syncCloverPosDoc.cloverUrl,
+                response = HTTP.del(syncPosDoc.cloverUrl,
                             {
                                 headers:  {
-                                              'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey
+                                              'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey
                                           }
                             });
                 break;
@@ -92,7 +93,7 @@ syncCloverPos: function (syncCloverPosDoc)
             default:
             {
             
-                console.log(syncCloverPosDoc.sessionId + ": syncCloverPos: Sorry, Not a valid operation " + operation);
+                console.log(syncPosDoc.sessionId + ": syncCloverPos: Sorry, Not a valid operation " + operation);
                 return;
             }
             
@@ -100,18 +101,25 @@ syncCloverPos: function (syncCloverPosDoc)
         
         if (response.statusCode != 200)
         {
-            console.log(syncCloverPosDoc.sessionId + 'syncCloverPos-Failed', 'syncCloverPos failed with http status code [' + response.statusCode + ']', e);
+            console.log(syncPosDoc.sessionId + ': syncCloverPos-Failed', 'syncCloverPos failed with http status code [' + response.statusCode + ']', e);
+            console.log(syncPosDoc.sessionId + ': syncCloverPos-Failed', 'Jay - TODO have a process email to notifiy the Administrator');
+            response.syncPosSucess = false;
+            response.syncPosDoc = syncPosDoc;
+
         } else
         {
-            console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:response.content:: " + JSON.stringify(response.content, null, 4));
+            console.log(syncPosDoc.sessionId + ": syncCloverPos:response.content:: " + JSON.stringify(response.content, null, 4));
+            response.syncPosSucess = true;
         }
     }
     catch (e)
     {
-        console.log(syncCloverPosDoc.sessionId + ': syncCloverPos-Failed', 'Troble synchronizing  with clover POS', e);
-        response.cloverError = e;
-        response.clover = false;
-        response.syncCloverPosDoc = syncCloverPosDoc;
+        console.log(syncPosDoc.sessionId + ': syncCloverPos-Failed ( catch block) ', 'Troble synchronizing  with clover POS', e);
+        console.log(syncPosDoc.sessionId + ': syncCloverPos-Failed ( catch block) ', 'Jay - TODO have a process email to notifiy the Administrator');
+
+        response.syncPosError = e;
+        response.syncPosSucess = false;
+        response.syncPosDoc = syncPosDoc;
     }
     return response;
 }

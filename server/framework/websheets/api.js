@@ -330,30 +330,32 @@
 
     	try{
 
+    		var upsertSupportedTabResponse   ={};
+
 	    	switch (collectionName.toUpperCase())
 	    	{
 	    		case websheets.private.generic.MENU:
 	    		
 	    			data.Name = s(data.Name).trim().titleize().value();
-	    			Menu.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
+	    			upsertSupportedTabResponse   = Menu.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
 
 	    			break;
 
 	    		case websheets.private.generic.ORDERS:
 
-	    			Orders.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
-	    			Meteor.call('sendReadyNotification', sessionid, data);
+	    			upsertSupportedTabResponse  = Orders.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
+	    			upsertSupportedTabResponse .sendReadyNotification = Meteor.call('sendReadyNotification', sessionid, data);
 
 	    			break;
 
 	    		case websheets.private.generic.CONTENT:
-	    			Content.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
+	    			upsertSupportedTabResponse  = Content.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
 	    			//Content.update({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data,{upsert:true});
 
 	    			break;
 
 	    	    case websheets.private.generic.SETTINGS:
-	    	    	Settings.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
+	    	    	upsertSupportedTabResponse  = Settings.upsert({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data);
 	    	    	//Settings.update({ UniqueId : data[UniqueId_key], orgname : data[orgname]}, data,{upsert:true});
 
 	    			break;	
@@ -366,10 +368,12 @@
 			result.receiveddata = 	data;
 			result.tabName 		= 	collectionName;
 			result.UniqueId_key = 	UniqueId_key;
+			result.upsertSupportedTabResponse      =   upsertSupportedTabResponse ;
 
     	}catch (err)
     	{
     			result.status 		=  websheets.public.status.FAILED;
+    			result.upsertSupportedTabResponse      =   upsertSupportedTabResponse ;
 				result.error		=  err;
 				result.errorStack   =  err.stack
 		  		console.log(sessionid + ": upsertSupportedTab (catch-block): Caught error on upserting data from sheet", err);
@@ -462,8 +466,8 @@
     {
 
 		console.log(sessionid + ": findSupportedTab: processing supported tab = " + collectionName);
-		console.log(sessionid + ": findSupportedTab: UniqueId_key  = " + UniqueId_key);
-		console.log(sessionid + ": findSupportedTab: Data      = " + JSON.stringify(data, null, 4));
+		console.log(sessionid + ": findSupportedTab: UniqueId_key             = " + UniqueId_key);
+		console.log(sessionid + ": findSupportedTab: Data                     = " + JSON.stringify(data, null, 4));
 
 
     	var result 			={};
@@ -515,7 +519,7 @@
 		
 
     	}
-    	 console.log(sessionid + ": findSupportedTab: " + collectionName + "count () = " + dataFromDb.count());
+    	 console.log(sessionid + ": findSupportedTab: " + collectionName + "record count() from database = " + dataFromDb.count());
 
 		 //console.log(sessionid + ": findSupportedTab: returing result from findSupportedTab = " + JSON.stringify(result, null, 4));
 
@@ -530,8 +534,8 @@
     {
     	result = {};
     	var supportedTabCursor = findSupportedTab(collectionName, data[0] , UniqueId_key, orgname, sessionid);
-    	console.log(sessionid + ": processSupportedTab: " + collectionName + "count () = " + supportedTabCursor.dataFromDb.length);
-    	for(var i=0; i<data.length; i++)
+    	console.log(sessionid + ": processSupportedTab: " + collectionName + "record count() from database = " + supportedTabCursor.dataFromDb.length);
+    	for( var i = 0; i < data.length; i++ )
 		{
 			console.log ( sessionid + ': processSupportedTab: data[' + i + '].UniqueId = ' + data[i].UniqueId);
 
@@ -552,8 +556,9 @@
 
 		}
 
-		console.log(sessionid + ': processSupportedTab: Size of array received from db after check : '+ supportedTabCursor.dataFromDb.length);
+		console.log(sessionid + ': processSupportedTab: Size of array received from db after check 			=  '+ supportedTabCursor.dataFromDb.length);
 		result.recordsToBeDeleted= supportedTabCursor.dataFromDb.length;
+		console.log(sessionid + ': processSupportedTab: Number of records about to be deleted from database =  '+ supportedTabCursor.dataFromDb.length);
 
 		var deletedRecords =[];
 
@@ -586,7 +591,7 @@
 
 		}
 		result.upsertedRecords = upsertedRecords;
-		 console.log(sessionid + ": findSupportedTab: returing result from findSupportedTab = " + JSON.stringify(result, null, 4));
+		console.log(sessionid + ": findSupportedTab: result returned from findSupportedTab = " + JSON.stringify(result, null, 4));
 
 		 return result;
     }
