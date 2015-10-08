@@ -63,17 +63,17 @@ syncCloverPos: function (syncCloverPosDoc)
 
             case websheets. public.generic.UPDATE:
             {
-                syncCloverPosDoc.cloverUrl += syncCloverPosDoc.doc.posId;
+                syncCloverPosDoc.cloverUrl = syncCloverPosDoc.cloverUrl +'/'+ syncCloverPosDoc.doc.posId;
                 syncCloverPosDoc.categoryDoc ={ "name": syncCloverPosDoc.doc.Value, "id": syncCloverPosDoc.doc.posId};
                 console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
             
-                response = HTTP.post(cloverUrl,{data: syncCloverPosDoc.categoryDoc,headers:{'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey}});
+                response = HTTP.post(syncCloverPosDoc.cloverUrl,{data: syncCloverPosDoc.categoryDoc,headers:{'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey}});
                 break;
             }
             
             case websheets. public.generic. DELETE:
             {
-                syncCloverPosDoc.cloverUrl += syncCloverPosDoc.doc.posId;
+                syncCloverPosDoc.cloverUrl = syncCloverPosDoc.cloverUrl +'/'+ syncCloverPosDoc.doc.posId;
             
                 syncCloverPosDoc.categoryDoc =  {
                                                   "id": syncCloverPosDoc.doc.posId
@@ -81,7 +81,7 @@ syncCloverPos: function (syncCloverPosDoc)
 
                 console.log(syncCloverPosDoc.sessionId + ": syncCloverPos:syncCloverPosDoc:         " + JSON.stringify(syncCloverPosDoc, null, 4));
             
-                response = HTTP.del(cloverUrl,
+                response = HTTP.del(syncCloverPosDoc.cloverUrl,
                             {
                                 headers:  {
                                               'Authorization': 'Bearer ' + syncCloverPosDoc.cloverApiKey
@@ -108,7 +108,7 @@ syncCloverPos: function (syncCloverPosDoc)
     }
     catch (e)
     {
-        console.log(syncCloverPosDoc.syncCloverPosDoc.sessionId + ': syncCloverPos-Failed', 'Troble synchronizing  with clover POS', e);
+        console.log(syncCloverPosDoc.sessionId + ': syncCloverPos-Failed', 'Troble synchronizing  with clover POS', e);
         response.cloverError = e;
         response.clover = false;
         response.syncCloverPosDoc = syncCloverPosDoc;

@@ -951,7 +951,7 @@ OrdersMeta.after.insert(function (userId, doc) {
     Settings.after.update(function (userId, doc, fieldNames, modifier, options) 
     {
     	var hookSessionId = Meteor.uuid();
-
+		console.log(hookSessionId + ': Settings.after.update:hookSessionId 	= ' + hookSessionId);
 
     	if( modifier.Key === 'category_menu' )
     	{
@@ -966,7 +966,7 @@ OrdersMeta.after.insert(function (userId, doc) {
 
 			if(isPosSystemEnabled(doc.orgname) && doc.Value)
 			{
-				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
+				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
 				console.log(hookSessionId + ': Settings.after.update:methodToCall    	= ' + methodToCall);
 
 				var syncCloverPosDoc = {
@@ -1000,6 +1000,7 @@ OrdersMeta.after.insert(function (userId, doc) {
 		   	console.log(hookSessionId +': Settings.after.update : Category Name 		= ' + doc.Value);
 		   	var menuByCategoriesCount = Menu.find({'Category': doc.Value}).count();
 		   	console.log(hookSessionId +': Settings.after.update : Menu Count by Category ' +  doc.Value +' = ' + menuByCategoriesCount);
+		   	console.log(hookSessionId +': Settings.after.update : posResponse.data.id		= ' + posResponse.data.id);
 		   	if(posResponse.data.id)
 		   	{
 		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount, 'posId':posResponse.data.id}});
@@ -1031,10 +1032,15 @@ Settings.after.remove(function (userId, doc) {
 	{
 		if(doc.posId)
 		{
-			var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'PosCategory'; // s('clover').capitalize().value()- converts clover --> Clover
+			var syncCloverPosDoc = {
+       										"doc":doc,
+											"sessionId": hookSessionId,
+      										"component": "categories"
+									}
+			var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
 			console.log(hookSessionId + ': Settings.after.remove:methodToCall    	= ' + methodToCall);
-			console.log(hookSessionId + ': Settings.after.remove:deleting POS' + doc.posId);
-			posResponse = Meteor.call(methodToCall, hookSessionId, doc, websheets.public.generic.DELETE);
+			console.log(hookSessionId + ': Settings.after.remove:deleting POS' + syncCloverPosDoc.doc.posId);
+			posResponse = Meteor.call(methodToCall, syncCloverPosDoc);
 
 		}
 		else
