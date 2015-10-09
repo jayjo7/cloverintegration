@@ -914,7 +914,7 @@ OrdersMeta.after.insert(function (userId, doc) {
 				var syncPosDoc = {
        										"doc":doc,
 											"sessionId": hookSessionId,
-      										"component": "categories",
+      										"component": websheets.public.generic.CATEGORIES,
       										"operation": websheets.public.generic.CREATE
 										}
 				console.log(hookSessionId + ': Settings.after.insert:methodToCall    	= ' + methodToCall);
@@ -973,26 +973,39 @@ OrdersMeta.after.insert(function (userId, doc) {
 				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
 				console.log(hookSessionId + ': Settings.after.update:methodToCall    	= ' + methodToCall);
 
-				var syncPosDoc = {
-       										"doc":doc,
-											"sessionId": hookSessionId,
-      										"component": "categories"
-										}
-
+				var syncPosDoc = 	{
+       									"doc":doc,
+										"sessionId": hookSessionId,
+      									"component": websheets.public.generic.CATEGORIES
+									}
+						
+	
 				if(this.previous.posId)
 				{
 			    	console.log(hookSessionId + ': Settings.after.update:updating POS Category= ' + this.previous.posId);
-			    	doc.posId = this.previous.posId;
-			    	syncPosDoc.operation= websheets.public.generic.UPDATE;
+					var shouldPosUpdated  =	checkShouldPosUpdated (	hookSessionId, 
+																	websheets.public.generic.CATEGORIES,
+																	this.previous,
+																	doc);	
+					console.log(hookSessionId + ': Settings.after.update:shouldPosUpdated    	= ' + shouldPosUpdated);
+
+			    	if (shouldPosUpdated)
+			    	{
+			    		doc.posId = this.previous.posId;
+			    		syncPosDoc.operation= websheets.public.generic.UPDATE;
+			    		posResponse = Meteor.call(methodToCall, syncPosDoc);
+			    	}
+
 
 				}
 				else
 				{
 					console.log(hookSessionId + ': Settings.after.update:Creating POS Category');
 					syncPosDoc.operation = websheets.public.generic.CREATE;
+					posResponse = Meteor.call(methodToCall, syncPosDoc);
+
 
 				}
-				posResponse = Meteor.call(methodToCall, syncPosDoc);
 				console.log(hookSessionId + ': Settings.after.update:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
 
 			}
@@ -1004,9 +1017,14 @@ OrdersMeta.after.insert(function (userId, doc) {
 		   	console.log(hookSessionId +': Settings.after.update : Category Name 		= ' + doc.Value);
 		   	var menuByCategoriesCount = Menu.find({'Category': doc.Value}).count();
 		   	console.log(hookSessionId +': Settings.after.update : Menu Count by Category ' +  doc.Value +' = ' + menuByCategoriesCount);
-		   	if(posResponse && posResponse.syncPosSucess && posResponse.data.id)
+		   	
+		   	if( posResponse && posResponse.syncPosSucess && posResponse.data.id )
 		   	{
 		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount, 'posId':posResponse.data.id}});
+		   	}
+		   	else if ((this.previous.posId))
+		   	{
+		   		Settings.update({'Key':'category_menu', 'Value': doc.Value,  orgname:doc.orgname}, {$set:{'menuItemCount': menuByCategoriesCount, 'posId':this.previous.posId}});
 		   	}
 		   	else
 		   	{
@@ -1042,7 +1060,7 @@ Settings.after.remove(function (userId, doc) {
 			var syncPosDoc = {
        							"doc":doc,
 								"sessionId": hookSessionId,
-      							"component": "categories",
+      							"component": websheets.public.generic.CATEGORIES,
       							"operation": websheets.public.generic.DELETE
 							}
 			var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
@@ -1263,4 +1281,42 @@ Settings.after.remove(function (userId, doc) {
 
 
     	}
+    }
+
+
+    checkShouldPosUpdated =function (sessionId, component, previousDoc, doc)
+    {
+    	console.log(sessionId + ": shouldPosUpdated: component =" + component);
+
+    	try
+    	{
+	    	var response = true;
+
+	    	switch (component)
+	    	{
+	    		   case websheets.public.generic.CATEGORIES : 
+	    		   {
+	    		   		if(	   previousDoc.Value === doc.Value
+	    		   			|| previousDoc.sheetRowId === doc.sheetRowId)
+	    		   		{
+	    		   			response = false;	
+	    		   		}
+
+	    		   	break;
+	    		   }
+	    		   default:
+	    		   {
+	    		   		response = false;
+	                	console.log(sessionId + ": shouldPosUpdated: Sorry, Not a valid component " + component);
+
+	    		   }
+
+	    	}
+	    	return response;
+	    }catch (e)
+	    {
+	    	console.log(sessionId + ": shouldPosUpdated- Failed ( Catch - block ) : Error" + e);
+	    	throw e;
+
+	    }
     }
