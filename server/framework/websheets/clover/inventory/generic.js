@@ -49,36 +49,27 @@ syncCloverPos: function (syncPosDoc)
             case websheets. public.generic.CREATE:
             {
             
-                syncPosDoc.categoryDoc ={
-                                                "sortOrder": syncPosDoc.doc.sheetRowId,
-                                                "name": syncPosDoc.doc.Value,
-                                                "id": syncPosDoc.doc.UniqueId
-                                              };
+                syncPosDoc.posDoc = buildCraeteDataObject(syncPosDoc);
+
                 console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));               
-                response = HTTP.post(syncPosDoc.cloverUrl,{ data: syncPosDoc.categoryDoc, headers:{ 'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
+                response = HTTP.post(syncPosDoc.cloverUrl,{ data: syncPosDoc.posDoc, headers:{ 'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
                 break;
             }
 
             case websheets. public.generic.UPDATE:
             {
                 syncPosDoc.cloverUrl = syncPosDoc.cloverUrl +'/'+ syncPosDoc.doc.posId;
-                syncPosDoc.categoryDoc ={ 
-                                            "name": syncPosDoc.doc.Value, 
-                                            "id": syncPosDoc.doc.posId
-                                        };
+                syncPosDoc.posDoc =  buildUpdateDataObject(syncPosDoc);
+
                 console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));
             
-                response = HTTP.post(syncPosDoc.cloverUrl,{data: syncPosDoc.categoryDoc,headers:{'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
+                response = HTTP.post(syncPosDoc.cloverUrl,{data: syncPosDoc.posDoc,headers:{'Authorization': 'Bearer ' + syncPosDoc.cloverApiKey}});
                 break;
             }
             
             case websheets. public.generic. DELETE:
             {
                 syncPosDoc.cloverUrl = syncPosDoc.cloverUrl +'/'+ syncPosDoc.doc.posId;
-            
-                syncPosDoc.categoryDoc =  {
-                                              "id": syncPosDoc.doc.posId
-                                          };
 
                 console.log(syncPosDoc.sessionId + ": syncCloverPos:syncPosDoc:         " + JSON.stringify(syncPosDoc, null, 4));
             
@@ -93,7 +84,7 @@ syncCloverPos: function (syncPosDoc)
             default:
             {
             
-                console.log(syncPosDoc.sessionId + ": syncCloverPos: Sorry, Not a valid operation " + operation);
+                console.log(syncPosDoc.sessionId + ": syncCloverPos: Sorry, Not a valid operation " + syncPosDoc.operation);
                 return;
             }
             
@@ -124,6 +115,95 @@ syncCloverPos: function (syncPosDoc)
     return response;
 }
 });
+
+
+buildCraeteDataObject   = function (syncPosDoc)
+{
+    var posDoc ={}
+
+        switch(syncPosDoc.component)
+        {
+
+            case websheets. public.generic.CATEGORIES:
+            {
+
+                posDoc =   { 
+                                "sortOrder":    syncPosDoc.doc.sheetRowId,
+                                "name":         syncPosDoc.doc.Value
+                            };
+                break;        
+
+
+            }     
+            case websheets. public.generic.ITEMS:
+            {
+                posDoc =   { 
+                                "price":    syncPosDoc.doc.Price,
+                                "name":     syncPosDoc.doc.Name,
+                                "categories":   [
+                                                    {
+                                                        "name" : syncPosDoc.doc.Category,
+                                                    }
+                                                ]
+                            };
+
+                break;
+            }
+            default:
+            {
+                console.log(syncPosDoc.sessionId + ": buildCraeteDataObject: Sorry, Not a valid component " + syncPosDoc.component);
+                return;
+                
+            }
+
+
+            
+        }
+
+    return posDoc;    
+
+
+}
+
+buildUpdateDataObject = function (syncPosDoc)
+{
+    var posDoc ={}
+
+        switch(syncPosDoc.component)
+        {
+
+            case websheets. public.generic.CATEGORIES:
+            {
+
+                posDoc =    {
+                                "sortOrder":    syncPosDoc.doc.sheetRowId,
+                                "name":         syncPosDoc.doc.Value,
+                                "id":           syncPosDoc.doc.posId
+                            };
+
+                break;        
+
+
+
+            }   
+            case websheets. public.generic.ITEMS:
+            {
+
+                break;
+            }
+            default:
+            {
+
+                console.log(syncPosDoc.sessionId + ": buildCraeteDataObject: Sorry, Not a valid component " + syncPosDoc.component);
+                return;
+                
+            }
+
+
+    return posDoc;         
+        }
+
+}
 
 
 

@@ -859,14 +859,52 @@ OrdersMeta.after.insert(function (userId, doc) {
 });
 
 
+
+Menu.after.insert(function(userId, doc)
+{
+	//Below code is added to send the menu to clover items tab
+	var hookSessionId = Meteor.uuid();
+	var posResponse;
+
+	if(isPosSystemEnabled(doc.orgname) && doc.Name)
+	{
+		var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
+		var syncPosDoc = {
+       						"doc":doc,
+							"sessionId": hookSessionId,
+      						"component": websheets.public.generic.ITEMS,
+      						"operation": websheets.public.generic.CREATE
+						}
+						
+		console.log(hookSessionId + ': Menu.after.insert:methodToCall    	= ' + methodToCall);
+		console.log(hookSessionId + ': Menu.after.insert:Creating POS item');
+		posResponse = Meteor.call(methodToCall, syncPosDoc);
+		console.log(hookSessionId + ': Menu.after.insert:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
+		Menu.update({ 'UniqueId' : doc.UniqueId, orgname : doc.orgname},  {$set: {'posId':posResponse.data.id}} );
+
+	}
+	else
+	{
+		console.log(hookSessionId + ': Menu.after.update:POS System is not enabled for this client or the Vaule is empty : doc.orgname = ' + doc.orgname + 'doc.Value = ' + doc.Value);
+	}
+
+	//Below code is to process the data for Digital Menu screen
+	if (isPreProcessForDigitalMenuEnabled(doc.orgname))
+	{
+		preProcessDmMetaData(hookSessionId , doc);
+	}
+});
+
+
     Menu.after.update(function (userId, doc, fieldNames, modifier, options) 
     {
     	   var hookSessionId = Meteor.uuid();
-    	   console.log(hookSessionId + ': Menu.after.update:userId     = ' + userId);
-		   console.log(hookSessionId + ': Menu.after.update:doc        = ' + JSON.stringify(doc, null, 4));
-		   console.log(hookSessionId + ': Menu.after.update:fieldNames = ' + JSON.stringify(fieldNames, null, 4));
-		   console.log(hookSessionId + ': Menu.after.update:modifier   = ' + JSON.stringify(modifier, null, 4));
-		   console.log(hookSessionId + ': Menu.after.update:options    = ' + JSON.stringify(options, null, 4));
+    	   console.log(hookSessionId + ': Menu.after.update:this.previous 	= ' + JSON.stringify(this.previous, null, 4));
+    	   console.log(hookSessionId + ': Menu.after.update:userId     		= ' + userId);
+		   console.log(hookSessionId + ': Menu.after.update:doc        		= ' + JSON.stringify(doc, null, 4));
+		   console.log(hookSessionId + ': Menu.after.update:fieldNames 		= ' + JSON.stringify(fieldNames, null, 4));
+		   console.log(hookSessionId + ': Menu.after.update:modifier   		= ' + JSON.stringify(modifier, null, 4));
+		   console.log(hookSessionId + ': Menu.after.update:options    		= ' + JSON.stringify(options, null, 4));
 		   var categories = Settings.find({'Key':'category_menu'},{fields: {'Value' : 1}}).fetch();
 		   var totalMenuItemCount=0
 		   for (categoriesKey in categories)
@@ -886,6 +924,55 @@ OrdersMeta.after.insert(function (userId, doc) {
 		   totalMenuItemCountObject.orgname		= doc.orgname;
 		   console.log(hookSessionId + ': Menu.after.update: totalMenuItemCountObject       = ' + JSON.stringify(totalMenuItemCountObject, null, 4));
 		   Settings.update({'Key':'totalMenuItemCount', orgname:doc.orgname}, totalMenuItemCountObject, {upsert:true});
+
+		   	var posResponse;
+
+			if(isPosSystemEnabled(doc.orgname) &&  fieldNames[0] != 'posId')
+			{
+				var methodToCall = 'sync'+ s(Meteor.settings.private[doc.orgname].posProcessor).capitalize().value() +'Pos'; // s('clover').capitalize().value()- converts clover --> Clover
+				console.log(hookSessionId + ': Menu.after.update:methodToCall    	= ' + methodToCall);
+
+				var syncPosDoc = 	{
+       									"doc": doc,
+										"sessionId": hookSessionId,
+      									"component": websheets.public.generic.ITEMS,
+      									"operation": websheets.public.generic.UPDATE
+									}
+						
+	
+				if(this.previous.posId)
+				{
+			    	console.log(hookSessionId + ': Menu.after.update:updating POS Category= ' + this.previous.posId);
+					var shouldPosUpdated  =	checkShouldPosUpdated (	hookSessionId, 
+																	websheets.public.generic.CATEGORIES,
+																	this.previous,
+																	doc);	
+					console.log(hookSessionId + ': Menu.after.update:shouldPosUpdated    	= ' + shouldPosUpdated);
+
+			    	if (shouldPosUpdated)
+			    	{
+			    		doc.posId = this.previous.posId;
+			    		syncPosDoc.operation= websheets.public.generic.UPDATE;
+			    		posResponse = Meteor.call(methodToCall, syncPosDoc);
+			    	}
+
+
+				}
+				else
+				{
+					console.log(hookSessionId + ': Menu.after.update:Creating POS Category');
+					syncPosDoc.operation = websheets.public.generic.CREATE;
+					posResponse = Meteor.call(methodToCall, syncPosDoc);
+
+
+				}
+				console.log(hookSessionId + ': Menu.after.update:posResponse    	= ' + JSON.stringify(posResponse, null, 4));
+
+			}
+			else
+			{
+				console.log(hookSessionId + ': Menu.after.update:POS System is not enabled for this client: doc.orgname = ' + doc.orgname  + 'or updating the posId' );
+			}
 
 		   	if (isPreProcessForDigitalMenuEnabled(doc.orgname))
 		   	{
@@ -976,7 +1063,8 @@ OrdersMeta.after.insert(function (userId, doc) {
 				var syncPosDoc = 	{
        									"doc":doc,
 										"sessionId": hookSessionId,
-      									"component": websheets.public.generic.CATEGORIES
+      									"component": websheets.public.generic.CATEGORIES,
+      									"operation": websheets.public.generic.UPDATE
 									}
 						
 	
